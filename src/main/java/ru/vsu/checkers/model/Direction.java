@@ -5,9 +5,9 @@ public enum Direction {
     SOUTH_EAST,
     SOUTH_WEST,
     NORTH_WEST,
-    NORTH,
     SOUTH,
     EAST,
-    WEST
+    WEST,
+    NORTH
 
 }

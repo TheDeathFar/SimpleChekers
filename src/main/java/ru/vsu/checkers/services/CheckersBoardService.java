@@ -15,39 +15,44 @@ public class CheckersBoardService implements BoardService{
 
     @Override
     public void setBoard(Game game) {
-        List<Cell> upCells = new ArrayList<>();
-        Cell leftUp = new Cell();
-        game.setLeftUpCell(leftUp);
-        upCells.add(leftUp);
-        Cell prev = leftUp;
-        for(int i = 1; i < 8; i++){
-            Cell curr = new Cell();
-            prev.getNeighbours().put(Direction.EAST, curr);
-            curr.getNeighbours().put(Direction.WEST, prev);
-            prev = curr;
-            upCells.add(curr);
-        }
+        Cell[][] board = new Cell[8][8];
 
-        for(int i = 1; i < 8; i++){
-            List<Cell> prevUp = new ArrayList<>();
-            for(int j = 0; j < 8; j++){
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[i].length; j++){
                 Cell c = new Cell();
-                prevUp.add(c);
-                upCells.get(j).getNeighbours().put(Direction.SOUTH, c);
-                c.getNeighbours().put(Direction.NORTH, upCells.get(j));
-                if(j > 0){
-                    c.getNeighbours().put(Direction.NORTH_WEST, upCells.get(j - 1));
-                    upCells.get(j - 1).getNeighbours().put(Direction.SOUTH_EAST, c);
-                    prev.getNeighbours().put(Direction.EAST, c);
-                    c.getNeighbours().put(Direction.WEST, prev);
-                }
-                if(j+1 < 8){
-                    c.getNeighbours().put(Direction.NORTH_EAST, upCells.get(j + 1));
-                    upCells.get(j + 1).getNeighbours().put(Direction.SOUTH_WEST, c);
-                }
+                board[i][j] = c;
+                createConnection(i, j, board);
             }
-            upCells = prevUp;
         }
+        game.setLeftUpCell(board[0][0]);
+    }
+
+    private void createConnection(int i, int j, Cell[][] cells){
+        Cell curr = cells[i][j];
+        if(isInside(i, j-1, cells)){
+            Cell need = cells[i][j-1];
+            curr.getNeighbours().put(Direction.WEST, need);
+            need.getNeighbours().put(Direction.EAST, curr);
+        }
+        if(isInside(i-1, j-1, cells)){
+            Cell need = cells[i-1][j-1];
+            need.getNeighbours().put(Direction.SOUTH_EAST, curr);
+            curr.getNeighbours().put(Direction.NORTH_WEST, need);
+        }
+        if(isInside(i-1, j, cells)){
+            Cell need = cells[i-1][j];
+            need.getNeighbours().put(Direction.SOUTH, curr);
+            curr.getNeighbours().put(Direction.NORTH, need);
+        }
+        if(isInside(i-1, j+1, cells)){
+            Cell need = cells[i-1][j+1];
+            need.getNeighbours().put(Direction.SOUTH_WEST, curr);
+            curr.getNeighbours().put(Direction.NORTH_EAST, need);
+        }
+    }
+
+    private boolean isInside(int i, int j, Cell[][] cells){
+        return i >= 0 && i < cells.length && j >= 0 && j < cells[i].length;
     }
 
     @Override
@@ -55,7 +60,9 @@ public class CheckersBoardService implements BoardService{
         Cell curr = game.getLeftUpCell();
         List<Direction> directionsForDown = Arrays.asList(Direction.NORTH_WEST, Direction.NORTH_EAST);
         List<Direction> directionsForUp = Arrays.asList(Direction.SOUTH_WEST, Direction.SOUTH_EAST);
-        Map<Figure, List<Direction>> figureListMap = new HashMap<>();
+        Map<Player, List<Direction>> figureListMap = new HashMap<>();
+        figureListMap.put(down, directionsForDown);
+        figureListMap.put(up, directionsForUp);
         Set<Figure> figureForPlayerOne = new HashSet<>();
         Set<Figure> figureForPlayerTwo = new HashSet<>();
         Map<Cell, Figure> cellFigureMap = new HashMap<>();
@@ -67,15 +74,14 @@ public class CheckersBoardService implements BoardService{
             Cell c = curr;
             for(int j = 0; j < 8; j++){
                 Figure f = null;
-                if (i < 4 || i > 5) {
+                if (i < 3 || i > 4) {
                     if (cellChecker.isGoodCell(i, j)) {
-                        f = new Figure(FigureType.Checker);
                         if (i < 4) {
+                            f = new Figure(FigureType.Checker, Color.White);
                             figureForPlayerOne.add(f);
-                            figureListMap.put(f, directionsForUp);
                         } else {
+                            f = new Figure(FigureType.Checker, Color.Black);
                             figureForPlayerTwo.add(f);
-                            figureListMap.put(f, directionsForDown);
                         }
                         figureCellMap.put(f, c);
                     }

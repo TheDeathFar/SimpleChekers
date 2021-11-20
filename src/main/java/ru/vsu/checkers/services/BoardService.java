@@ -1,6 +1,7 @@
 package ru.vsu.checkers.services;
 
 import ru.vsu.checkers.model.Game;
+import ru.vsu.checkers.model.Move;
 import ru.vsu.checkers.model.Player;
 
 public interface BoardService {

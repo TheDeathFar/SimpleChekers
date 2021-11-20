@@ -19,22 +19,23 @@ public class CheckerController implements GameController{
         this.visualGameService = new VisualCheckerGameService();
     }
 
+    @Override
     public void startGame(PlayerInfo one, PlayerInfo two, int numOfMoves){
         Map<Player, Mover> moverMap = new HashMap<>();
         moverMap.put(one.player(), one.mover());
         moverMap.put(two.player(), two.mover());
         Game game = gameService.createGame(one.player(), two.player());
-        VisualBoard vb = visualGameService.createVisualBoard(game);
         int step = 0;
-        while(!gameService.isEnd(game) || step < numOfMoves){
+        while(!gameService.isEnd(game) && step < numOfMoves){
             Player player = gameService.getCurrentPlayer(game);
             Mover m = moverMap.get(player);
-            Move move = m.getMove();
+            Move move = m.getMove(player, game);
             while(!gameService.canDoMove(player, move, game)){
-                move = m.getMove();
+                move = m.getMove(player, game);
             }
             gameService.doMove(move, player, game);
-            visualGameService.draw(vb);
+            visualGameService.draw(game);
+            step++;
         }
     }
 }

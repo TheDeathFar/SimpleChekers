@@ -14,13 +14,23 @@ public class Game {
 
     private Map<Player, Set<Figure>> playerFigures;
     private Map<Player, MoveValidator> playerMoveValidatorMap;
-    private Map<Figure, List<Direction>> figureDirection;
+    private Map<Player, List<Direction>> figureDirection;
+    private GameStatus gameStatus;
 
     //actually for figures
     private Map<Cell, Figure> cellFigure;
     private Map<Figure, Cell> figureCell;
 
     private List<MoveInfo> moveInfoList;
+
+
+    public GameStatus getGameStatus() {
+        return gameStatus;
+    }
+
+    public void setGameStatus(GameStatus gameStatus) {
+        this.gameStatus = gameStatus;
+    }
 
     public Map<Player, MoveValidator> getPlayerMoveValidatorMap() {
         return playerMoveValidatorMap;
@@ -30,11 +40,11 @@ public class Game {
         this.playerMoveValidatorMap = playerMoveValidatorMap;
     }
 
-    public Map<Figure, List<Direction>> getFigureDirection() {
+    public Map<Player, List<Direction>> getFigureDirection() {
         return figureDirection;
     }
 
-    public void setFigureDirection(Map<Figure, List<Direction>> figureDirection) {
+    public void setFigureDirection(Map<Player, List<Direction>> figureDirection) {
         this.figureDirection = figureDirection;
     }
 

@@ -9,9 +9,12 @@ import java.util.*;
 
 public class CheckersGameService implements GameService{
     private final BoardService boardService;
+    private final Map<FigureType, FigureService> figureServiceMap;
 
     public CheckersGameService() {
         this.boardService = new CheckersBoardService();
+        this.figureServiceMap = Map.of(FigureType.Checker, new CheckerService(),
+                FigureType.Queen, new QueenService());
     }
 
     @Override
@@ -27,7 +30,8 @@ public class CheckersGameService implements GameService{
         playerMoveValidatorMap.put(two, two instanceof Human ? new HumanMoveValidator() : new BotMoveValidator());
         game.setPlayerMoveValidatorMap(playerMoveValidatorMap);
         game.setPlayers(playerQueue);
-        return null;
+        game.setMoveInfoList(new ArrayList<>());
+        return game;
     }
 
     @Override
@@ -37,22 +41,14 @@ public class CheckersGameService implements GameService{
 
     @Override
     public void doMove(Move move, Player player, Game game) {
-        List<MicroStep> path = move.path();
-        Figure active = game.getCellFigure().get(path.get(0).from());
-        for(MicroStep ms : path){
-            List<Cell> between = getBetween(ms);
-            Optional<Cell> need = between.stream().filter(c -> game.getCellFigure().get(c) != null).findAny();
-            if(need.isPresent()){
-                Cell c = need.get();
-                Figure f = game.getCellFigure().get(c);
-                game.getCellFigure().put(c, null);
-                game.getFigureCell().put(f, null);
-                Player p = getOwner(f, game);
-                game.getPlayerFigures().get(p).remove(f);
-            }
-            game.getCellFigure().put(ms.from(), null);
-            game.getCellFigure().put(ms.to(), active);
-            game.getFigureCell().put(active, ms.to());
+        MicroStep ms = move.path().get(0);
+        Cell from = ms.from();
+        Figure f = game.getCellFigure().get(from);
+        if(f!= null){
+            FigureService fs = figureServiceMap.get(f.getFigureType());
+            fs.doMove(move, game);
+            game.getMoveInfoList().add(new MoveInfo(move, player));
+            game.getPlayers().add(game.getPlayers().poll());
         }
     }
 
@@ -68,20 +64,12 @@ public class CheckersGameService implements GameService{
     }
 
 
-    private List<Cell> getBetween(MicroStep ms){
-       List<Cell> answer = new ArrayList<>();
-       Cell c = ms.from();
-       while(c.getNeighbours().get(ms.direction()) != ms.to()){
-           c = c.getNeighbours().get(ms.direction());
-           answer.add(c);
-       }
-        return answer;
-    }
-
-    private Player getOwner(Figure f, Game game){
-        for(var l : game.getPlayerFigures().entrySet()){
-            if(l.getValue().contains(f)) return l.getKey();
+    public boolean hasAnyNecessaryMove(Player player, Game game){
+        for(Figure f : game.getPlayerFigures().get(player)){
+            Cell from = game.getFigureCell().get(f);
+            List<Move> moves = figureServiceMap.get(f.getFigureType()).getNecessaryMoves(from, game, player);
+            if(!moves.isEmpty()) return true;
         }
-        return null;
+        return false;
     }
 }

@@ -10,4 +10,5 @@ public interface GameService {
     void doMove(Move move, Player player, Game game);
     boolean isEnd(Game game);
     Player getCurrentPlayer(Game game);
+    boolean hasAnyNecessaryMove(Player player, Game game);
 }

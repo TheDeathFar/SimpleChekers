@@ -5,6 +5,15 @@ import java.util.List;
 public record Move(List<MicroStep> path) {
 
     @Override
+    public int hashCode() {
+        int answer = 31;
+        for(MicroStep st : path){
+            answer*= st.hashCode();
+        }
+        return answer;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if(obj == null) return false;
         if(obj == this) return true;
