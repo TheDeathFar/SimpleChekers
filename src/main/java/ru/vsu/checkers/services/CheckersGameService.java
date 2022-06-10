@@ -55,9 +55,6 @@ public class CheckersGameService implements GameService{
     @Override
     public boolean isEnd(Game game) {
         Set<Figure> figures = game.getPlayerFigures().get(getCurrentPlayer(game));
-        System.out.println("----");
-        System.out.println(figures.size());
-        System.out.println("----");
         return figures.isEmpty();
     }
 

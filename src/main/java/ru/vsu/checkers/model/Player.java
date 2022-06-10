@@ -1,2 +1,3 @@
-package ru.vsu.checkers.model;public interface Player {
+package ru.vsu.checkers.model;
+public interface Player {
 }
